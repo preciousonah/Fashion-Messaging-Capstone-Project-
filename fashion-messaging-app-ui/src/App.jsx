@@ -1,9 +1,14 @@
 import "./App.css";
-import Search from "../Search/Search";
-import Navbar from "../Navbar/Navbar";
-import FashionItems from "../FashionItems/FashionItems";
+import Search from "./components/Search/Search";
+import Navbar from "./components/Navbar/Navbar";
+import FashionItems from "./components/FashionItems/FashionItems";
 import { useEffect, useState } from "react";
 import { createClient } from "pexels";
+import Main from './components/Main/Main'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LoginForm from './components/LoginForm/LoginForm';
+import SignupForm from './components/SignupForm/SignupForm';
+
 
 const API_KEY = "06ZcwjgbmJBM8T2TxLUZ5iwdXXGxiAgz0Z018b7QPKwR1ExipkFjaAuw";
 const clientAPI = createClient(API_KEY);
@@ -11,10 +16,12 @@ const defaultQuery = "Fashion";
 const PHOTOS = 100;
 
 export default function App() {
+  
   const [photos, setPhotos] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    
     const query = searchQuery || defaultQuery;
     clientAPI.photos
       .search({ query, per_page: PHOTOS })
@@ -31,7 +38,14 @@ export default function App() {
   };
 
   return (
-    <div>
+    <div className="app">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={ <Main /> } />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/signup" element={<SignupForm />} />
+          </Routes>
+        </BrowserRouter>
       <div className="container">
       <Search onSearch={handleSearch} />
         <h1>Aesthetik.</h1>
@@ -41,3 +55,4 @@ export default function App() {
     </div>
   );
 }
+
