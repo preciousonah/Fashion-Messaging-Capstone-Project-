@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar/Navbar";
 import FashionItems from "./components/FashionItems/FashionItems";
 import { useEffect, useState } from "react";
 import { createClient } from "pexels";
+import { UserContext } from './UserContext';
 import Main from './components/Main/Main'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginForm from './components/LoginForm/LoginForm';
@@ -17,6 +18,14 @@ const PHOTOS = 100;
 
 export default function App() {
   
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  const updateUser = (newUser) => {
+    setUser(newUser);
+  };
   const [photos, setPhotos] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -31,7 +40,8 @@ export default function App() {
       .catch(error => {
         console.error("Error fetching photos:", error);
       });
-  }, [searchQuery]);
+      localStorage.setItem('user', JSON.stringify(user));
+  },[user], [searchQuery]);
 
   const handleSearch = query => {
     setSearchQuery(query);
@@ -39,6 +49,7 @@ export default function App() {
 
   return (
     <div className="app">
+        <UserContext.Provider value={{ user, updateUser }}>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={ <Main /> } />
@@ -46,6 +57,7 @@ export default function App() {
             <Route path="/signup" element={<SignupForm />} />
           </Routes>
         </BrowserRouter>
+      </UserContext.Provider>
       <div className="container">
       <Search onSearch={handleSearch} />
         <h1>Aesthetik.</h1>
@@ -55,4 +67,3 @@ export default function App() {
     </div>
   );
 }
-

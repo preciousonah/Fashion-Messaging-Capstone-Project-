@@ -8,8 +8,6 @@ async function migrateUsers() {
       const hashedPassword = await bcrypt.hash(user.password, 10);
       await user.update({ password: hashedPassword });
     }
-
-    console.log('User migration completed successfully.');
   } catch (error) {
     console.error('User migration failed:', error);
   }

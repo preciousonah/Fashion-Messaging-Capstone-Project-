@@ -14,7 +14,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json()); 
-app.use(morgan())
+app.use(morgan('combined')); 
+
 
 const SequelizeStore = SequelizeStoreInit(session.Store);
 const sessionStore = new SequelizeStore({
@@ -77,7 +78,6 @@ sequelize.sync({ alter: true })
   .then(() => {
     const port = 3000;
     app.listen(port, () => {
-      console.log(`App is listening on port ${port}`);
     });
   })
   .catch(error => {

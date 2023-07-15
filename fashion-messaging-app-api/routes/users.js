@@ -6,9 +6,7 @@ import { Op } from 'sequelize';
 const router = express.Router();
 
 try{
-  console.log("api response")
   router.post('/users', async (req, res) => {
-    console.log("it's here")
     const { username, password, email } = req.body;
 
   try {

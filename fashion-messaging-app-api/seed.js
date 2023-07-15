@@ -15,10 +15,8 @@ const seedDatabase = async () => {
   try {
     await sequelize.sync({ alter: true });
     await User.bulkCreate(userData);
-    console.log('User data has been seeded!');
 
     await Post.bulkCreate(postData);
-    console.log('Post data has been seeded!');
   } catch (error) {
     console.error('Error seeding data:', error);
   } finally {
