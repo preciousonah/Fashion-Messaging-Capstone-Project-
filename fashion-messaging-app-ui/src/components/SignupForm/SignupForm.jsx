@@ -1,12 +1,44 @@
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './SignupForm.css';
+import './SignupForm.css'
+import { UserContext } from '../../UserContext.js';
 
 const SignupForm = () => {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/');
+    try {
+      const response = await fetch(`http://localhost:3000/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const loggedInUser = data.user;
+
+        setUsername('');
+        setEmail('');
+        setPassword('');
+
+        updateUser(loggedInUser);
+
+        navigate('/');
+      } else {
+        alert('Signup failed');
+      }
+    } catch (error) {
+      alert('Signup failed: ' + error);
+    }
   };
 
   return (
@@ -18,6 +50,9 @@ const SignupForm = () => {
           <input
             type="text"
             id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </div>
         <div className="form-group">
@@ -25,6 +60,9 @@ const SignupForm = () => {
           <input
             type="email"
             id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
         <div className="form-group">
@@ -32,6 +70,9 @@ const SignupForm = () => {
           <input
             type="password"
             id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
         <button type="submit">Sign Up</button>

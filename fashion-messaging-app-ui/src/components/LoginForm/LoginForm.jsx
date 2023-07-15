@@ -1,13 +1,40 @@
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './LoginForm.css';
+import { UserContext } from '../../UserContext.js';
+import './LoginForm.css'
+
 
 const LoginForm = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const { updateUser } = useContext(UserContext);
+
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    navigate('/');
+    try {
+      const response = await fetch(`http://localhost:3000/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const loggedInUser = data.user;
+        updateUser(loggedInUser);
+        navigate('/');
+      } else {
+        alert('Login failed');
+      }
+    } catch (error) {
+      alert('Login failed: ' + error);
+    }
   };
 
   return (
@@ -19,6 +46,9 @@ const LoginForm = () => {
           <input
             type="text"
             id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </div>
         <div className="form-group">
@@ -26,6 +56,9 @@ const LoginForm = () => {
           <input
             type="password"
             id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
         <button type="submit">Login</button>
