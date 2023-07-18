@@ -37,7 +37,7 @@
     width: 500px;
     padding: 20px;
     margin-bottom: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--white);
     border-radius: 10px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   }
@@ -45,27 +45,27 @@
   .new-post-form {
     display: flex;
     flex-direction: column;
-    margin-top: 40px; /* Adjust the margin value as needed */
+    margin-top: 40px; 
   }
   
   .new-post-form input,
   .new-post-form textarea {
     margin-bottom: 10px;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--white);
     border-radius: 5px;
   }
   
   .new-post-form button {
     padding: 10px;
     border: none;
-    background-color: #007bff;
+    background-color: var( --main-color);
     color: white;
     cursor: pointer;
   }
   
   .new-post-form button:hover {
-    background-color: #0056b3;
+    background-color: var(--main-color);
   }
   
   .posts-container {
