@@ -41,7 +41,7 @@ export default function App() {
         console.error("Error fetching photos:", error);
       });
       localStorage.setItem('user', JSON.stringify(user));
-  },[user], [searchQuery]);
+  },[searchQuery]);
 
   const handleSearch = query => {
     setSearchQuery(query);
