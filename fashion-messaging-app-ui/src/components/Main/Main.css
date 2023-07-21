@@ -74,3 +74,8 @@
     align-items: center;
     width: 100%;
   }
+
+  .post-size{
+    width: 150px;
+    height: 150px;
+  }

@@ -19,9 +19,8 @@ const PHOTOS = 100;
 export default function App() {
   
   const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+    return null;
+});
 
   const updateUser = (newUser) => {
     setUser(newUser);
