@@ -8,6 +8,7 @@ export default function Navbar() {
           <li><a href="/">Profile</a></li>
           <li><a href="/about">Notifications</a></li>
           <li><a href="/contact">Messages</a></li>
+          <li><a href="/post">Post</a></li>
         </ul>
     </nav>
   );
