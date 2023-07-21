@@ -20,20 +20,32 @@ function Main() {
       };
       fetchPosts();
     }, []);
-  
+
     const handleChange = (event) => {
-      setForm({
-        ...form,
-        [event.target.name]: event.target.value,
-      });
+      if (event.target.name === 'picture') {
+        setForm({
+          ...form,
+          [event.target.name]: event.target.files[0],
+        });
+      } else {
+        setForm({
+          ...form,
+          [event.target.name]: event.target.value,
+        });
+      }
     };
-  
+
     const handleSubmit = async (event) => {
       event.preventDefault();
+    
+      let formData = new FormData();
+      formData.append('title', form.title);
+      formData.append('content', form.content);
+      formData.append('picture', form.picture);
+    
       const response = await fetch('http://localhost:3000/posts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: formData,
         credentials: 'include'
       });
       const newPost = await response.json();
@@ -44,7 +56,6 @@ function Main() {
       
       updateUser(null);
     };
-  
     return (
       <div className="main">
       <header className="header">
@@ -59,7 +70,7 @@ function Main() {
           )}
         </div>
       </header>
-        <form className="new-post-form" onSubmit={handleSubmit}>
+        <form className="new-post-form" onSubmit={handleSubmit} encType="multipart/form-data">    
             <input
                 type="text"
                 name="title"
@@ -73,6 +84,11 @@ function Main() {
                 value={form.content}
                 onChange={handleChange}
             />
+          <input
+              type="file"
+              name="picture"
+              onChange={handleChange}
+            />
             <button type="submit">Submit</button>
         </form>
         <div className="posts-container">
@@ -81,6 +97,7 @@ function Main() {
               <h2>{post.title}</h2>
               <h4>{post.user.username} at {new Date(post.createdAt).toLocaleString()}</h4>
               <p>{post.content}</p>
+              <img className="post-size" src={`http://localhost:3000/images/${post.picture}`} alt="Post" />
           </div>
           ))}
         </div>
