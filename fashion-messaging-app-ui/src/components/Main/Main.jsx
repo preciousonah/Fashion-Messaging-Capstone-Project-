@@ -43,13 +43,23 @@ function Main() {
       formData.append('content', form.content);
       formData.append('picture', form.picture);
     
+      try {
       const response = await fetch('http://localhost:3000/posts', {
         method: 'POST',
         body: formData,
         credentials: 'include'
       });
+      if (!response.ok) {
+          throw new Error('Failed to add post.');
+         }
+
       const newPost = await response.json();
       setPosts([newPost, ...posts]);
+
+        } catch (error) {
+          console.error('Error adding the post:', error.message);
+          alert('An error occurred while adding the post. Try completing the form');
+          }
     };
 
     const handleLogout = () => {
