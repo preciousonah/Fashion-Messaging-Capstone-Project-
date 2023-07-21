@@ -1,3 +1,4 @@
+
 import "./App.css";
 import { useEffect, useState } from "react";
 import { createClient } from "pexels";
@@ -15,6 +16,8 @@ const defaultQuery = "Fashion";
 const PHOTOS = 100;
 
 export default function App() {
+  
+  const [loading, setLoading] = useState(true);
 
   const [user, setUser] = useState(() => {
     return null;
@@ -28,16 +31,21 @@ export default function App() {
 
   useEffect(() => {
 
+    setLoading(true)
+    
     const query = searchQuery || defaultQuery;
     clientAPI.photos
       .search({ query, per_page: PHOTOS })
       .then(response => {
         setPhotos(response.photos);
+        setLoading(false)
       })
       .catch(error => {
         console.error("Error fetching photos:", error);
+        setLoading(false);
       });
       localStorage.setItem('user', JSON.stringify(user));
+
   },[searchQuery]);
 
   const handleSearch = query => {
@@ -45,9 +53,17 @@ export default function App() {
   };
 
 
+  if (loading) {
+    return (
+      <div className="app">
+        <p>Loading...</p> 
+      </div>
+    );
+  }
+
+
   return (
     <div className="app">
-
       <UserContext.Provider value={{ user, updateUser }}>
       <BrowserRouter>
         <Routes>
@@ -58,7 +74,7 @@ export default function App() {
         </Routes>
       </BrowserRouter>
       </UserContext.Provider>
-      
-</div>
+
+    </div>
   );
 }
