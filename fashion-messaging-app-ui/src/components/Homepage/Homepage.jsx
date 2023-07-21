@@ -4,7 +4,7 @@ import Search from "../Search/Search";
 import "./Homepage.css";
 
 
-function Homepage({loading, photos, handleSearch}) {
+function Homepage({photos, handleSearch}) {
   return (
     <div>
         <div className="container">
