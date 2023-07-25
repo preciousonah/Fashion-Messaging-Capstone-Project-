@@ -47,6 +47,23 @@ export default function App() {
       localStorage.setItem('user', JSON.stringify(user));
 
   },[searchQuery]);
+    var myHeaders = new Headers();
+    myHeaders.append("x-api-key", "c8dd1e873a6bde14651aa42ee44752f41c8da53b0aa4bfb5205d25805826f628");
+    
+    var formdata = new FormData();
+    formdata.append("image_url", "https://cdn.shopify.com/s/files/1/0266/6276/4597/products/300936541TANGERINE_2_1024x1024.jpg?v=1682513958");
+    
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+    };
+    
+    fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions)
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+  
 
   const handleSearch = query => {
     setSearchQuery(query);
