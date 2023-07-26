@@ -4,7 +4,7 @@ import Search from "../Search/Search";
 import "./Homepage.css";
 import { Link } from "react-router-dom";
 
-function Homepage({photos, handleSearch}) {
+function Homepage({photos, handleSearch, noResults}) {
   return (
     <div>
         <div className="container">
@@ -14,7 +14,7 @@ function Homepage({photos, handleSearch}) {
             <Search onSearch={handleSearch} />
         
         </div>
-            <FashionItems photos={photos} />
+            <FashionItems photos={photos} noResults={noResults} />
     </div>
   );
 }
