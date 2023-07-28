@@ -34,10 +34,9 @@ useEffect(() => {
   clientAPI.photos
     .search({ query, per_page: PHOTOS })
     .then(async response => { 
-      setLoading(false);
 
       var myHeaders = new Headers();
-      myHeaders.append("x-api-key", "1a4092c4563cc701627b1616fa6053190c6b538fd82b828d3fe20416bcc3dd3e");
+      myHeaders.append("x-api-key", "4d552e9f30522b1dec7c712f83c67c235be86e25ec14b4ba3493383ec7b81d3f");
 
       let fetchPromises = await Promise.all(response.photos.map(async photo => { 
         var formdata = new FormData();
@@ -53,13 +52,10 @@ useEffect(() => {
           const fetchResponse = await fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions);
           const result = await fetchResponse.json();
 
-          if (result.data.detected_items.length === 0) {
-          } else {
-            result.data.detected_items.forEach(item => {
-            });
-
+          if (result.data.detected_items.length !== 0) {
             return photo;
           }
+          
         } catch (error) {
           console.error('error', error);
         }
@@ -68,6 +64,7 @@ useEffect(() => {
       const fashionPhotos = fetchPromises.filter(photo => photo !== undefined);
       setPhotos(fashionPhotos);
       setNoResults(fashionPhotos.length === 0);
+      setLoading(false);
     })
     .catch(error => {
       console.error("Error fetching photos:", error);
