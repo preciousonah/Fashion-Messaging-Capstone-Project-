@@ -1,0 +1,22 @@
+
+
+    [
+        {
+          "userId": 1,
+          "searchTerm": "Shoes",
+          "imageUrl": "https://media.wired.com/photos/6154ba291b38af32f7638ffd/191:100/w_2580,c_limit/Gear-Barefoot-Shoes-Freet-Tanga-SOURCE-Freet.jpg",
+          "isFashion": true
+        },
+        {
+            "userId": 2,
+            "searchTerm": "Tree",
+            "imageUrl": "https://www.thespruce.com/thmb/ew5ClpRANa-yO53K8fFlU1rablk=/4169x0/filters:no_upscale():max_bytes(150000):strip_icc()/the-difference-between-trees-and-shrubs-3269804-hero-a4000090f0714f59a8ec6201ad250d90.jpg",
+            "isFashion": false
+          }
+        
+        
+      ]
+       
+      
+ 
+  
