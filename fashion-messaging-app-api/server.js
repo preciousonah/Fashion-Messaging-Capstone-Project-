@@ -21,9 +21,9 @@ const app = express();
 const API_KEY = "06ZcwjgbmJBM8T2TxLUZ5iwdXXGxiAgz0Z018b7QPKwR1ExipkFjaAuw";
 const clientAPI = createClient(API_KEY);
 const defaultQuery = "Fashion";
-const PHOTOS = 1;
+const PHOTOS = 8;
 
-
+let cache = new Map();
 app.use(cors({
   origin: 'http://localhost:3001',
   credentials: true
@@ -37,38 +37,47 @@ app.get('/photos', async (req, res) => {
   
   try {
     const response = await clientAPI.photos.search({ query, per_page: PHOTOS });
-   
-    var myHeaders = new Headers();
-    myHeaders.append("x-api-key", "4d552e9f30522b1dec7c712f83c67c235be86e25ec14b4ba3493383ec7b81d3f");                               
+    let fetchPromises = response.photos.map(async photo => {
+      if (cache.has(photo.src.original)) {
+        return cache.get(photo.src.original);
+      
+      } else {
+        var myHeaders = new Headers();
+        myHeaders.append("x-api-key", "4d552e9f30522b1dec7c712f83c67c235be86e25ec14b4ba3493383ec7b81d3f");                               
 
-    let fetchPromises = await Promise.all(response.photos.map(async photo => { 
-      var formdata = new FormData();
-      formdata.append("image_url", photo.src.original);
-    
+        var formdata = new FormData();
+        formdata.append("image_url", photo.src.original);
+      
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: formdata,
+        };
 
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-      };
+        try {
+          const fetchResponse = await fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions);
+          if (fetchResponse.status === 400) {
+            throw new Error('Image size too large for the API.');
+          }
+          const result = await fetchResponse.json();
 
-      try {
-        const fetchResponse = await fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions);
-        const result = await fetchResponse.json();     
+          if (result.data.detected_items.length > 0) {
+            cache.set(photo.src.original, photo); 
+            return photo;
+          }
 
-        if (result.data.detected_items.length > 0) {
-          return photo;     
+        } catch (error) {
+          console.error('error', error);
+          return null;
         }
-       
-      } catch (error) {
-        console.error('error', error);
       }
-     
-    }));
+    });
 
-    const fashionPhotos = fetchPromises.filter(photo => photo !== undefined)
-    res.json(fashionPhotos);
+    const fashionPhotos = await Promise.all(fetchPromises);
+    const validPhotos = fashionPhotos.filter(photo => photo !== undefined && photo !== null);
 
+    res.json(validPhotos);
+  
   } catch (error) {
     console.error("Error fetching photos:", error);
     res.status(500).json({message: error.message});
