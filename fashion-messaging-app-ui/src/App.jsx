@@ -8,7 +8,6 @@ import LoginForm from './components/LoginForm/LoginForm';
 import SignupForm from './components/SignupForm/SignupForm';
 import Homepage from './components/Homepage/Homepage';
 
-
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(() => {
@@ -24,7 +23,9 @@ export default function App() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:3000/photos?search=${searchQuery}`)
+    fetch(`http://localhost:3000/photos?search=${searchQuery}`, {
+      credentials: 'include', 
+    })
       .then(response => response.json())
       .then(photos => {
         setLoading(false);
