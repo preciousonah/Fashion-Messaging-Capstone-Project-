@@ -9,7 +9,7 @@ import path from 'path';
 import {fileURLToPath} from 'url';
 import { dirname } from 'path';
 import { sequelize } from './database.js';
-import { User, Post } from './models/index.js';
+import { User, Post, SearchResult } from './models/index.js';
 import userRoutes from './routes/users.js';
 import SequelizeStoreInit from 'connect-session-sequelize';
 
@@ -30,59 +30,6 @@ app.use(cors({
 }));
 app.use(express.json()); 
 app.use(morgan('combined')); 
-
-
-app.get('/photos', async (req, res) => {
-  const query = req.query.search || defaultQuery;
-  
-  try {
-    const response = await clientAPI.photos.search({ query, per_page: PHOTOS });
-    let fetchPromises = response.photos.map(async photo => {
-      if (cache.has(photo.src.original)) {
-        return cache.get(photo.src.original);
-      
-      } else {
-        var myHeaders = new Headers();
-        myHeaders.append("x-api-key", "4d552e9f30522b1dec7c712f83c67c235be86e25ec14b4ba3493383ec7b81d3f");                               
-
-        var formdata = new FormData();
-        formdata.append("image_url", photo.src.original);
-      
-        var requestOptions = {
-          method: 'POST',
-          headers: myHeaders,
-          body: formdata,
-        };
-
-        try {
-          const fetchResponse = await fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions);
-          if (fetchResponse.status === 400) {
-            throw new Error('Image size too large for the API.');
-          }
-          const result = await fetchResponse.json();
-
-          if (result.data.detected_items.length > 0) {
-            cache.set(photo.src.original, photo); 
-            return photo;
-          }
-
-        } catch (error) {
-          console.error('error', error);
-          return null;
-        }
-      }
-    });
-
-    const fashionPhotos = await Promise.all(fetchPromises);
-    const validPhotos = fashionPhotos.filter(photo => photo !== undefined && photo !== null);
-
-    res.json(validPhotos);
-  
-  } catch (error) {
-    console.error("Error fetching photos:", error);
-    res.status(500).json({message: error.message});
-  }
-});
 
 
 const storage = multer.diskStorage({
@@ -139,6 +86,71 @@ app.get('/posts', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+app.get('/photos', async (req, res) => {
+  const query = req.query.search || defaultQuery;
+
+  
+  try {
+    const response = await clientAPI.photos.search({ query, per_page: PHOTOS });
+    
+    let fetchPromises = response.photos.map(async photo => {
+      if (cache.has(photo.src.original)) {
+        return cache.get(photo.src.original);
+      
+      } else {
+        var myHeaders = new Headers();
+        myHeaders.append("x-api-key", "7008b5da328806c39a5561c3d51339c18dbb66dcd8bbfeebca80f0a96c44c332");           
+                     
+
+        var formdata = new FormData();
+        formdata.append("image_url", photo.src.original);
+      
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: formdata,
+        };
+
+        try {
+          const fetchResponse = await fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions);
+         
+          if (fetchResponse.status === 400) {
+            throw new Error('Image size too large for the API.');
+          }
+          const result = await fetchResponse.json();
+
+          if (result.data.detected_items.length > 0) {
+            cache.set(photo.src.original, photo);
+            return photo;
+          }
+
+        } catch (error) {
+          console.error('error', error);
+          return null;
+        }
+      }
+    });
+
+    const fashionPhotos = await Promise.all(fetchPromises);
+    const validPhotos = fashionPhotos.filter(photo => photo !== undefined && photo !== null);
+
+    for (let photo of validPhotos) {
+      await SearchResult.create({
+        searchTerm: query,
+        imageUrl: photo.src.original,
+        isFashion: true,  
+        userId: req.session.user ? req.session.user.id : null,  
+      });
+    }
+
+
+    res.json(validPhotos);
+  
+  } catch (error) {
+    console.error("Error fetching photos:", error);
+    res.status(500).json({message: error.message});
+  }
+});
 
 app.post('/posts', upload.single('picture'),
  async (req, res) => {
@@ -174,4 +186,4 @@ sequelize.sync({ alter: true })
   })
   .catch(error => {
     console.error('Unable to connect to the database:', error);
-  });
+  }); 
