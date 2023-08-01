@@ -4,7 +4,7 @@ import { sequelize } from '../database.js';
 export const SearchResult = sequelize.define('SearchResult', {
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     searchTerm: {
         type: DataTypes.STRING,
