@@ -10,6 +10,10 @@ export const SearchResult = sequelize.define('SearchResult', {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      searchCount: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       imageUrl: {
         type: DataTypes.STRING,
         allowNull: true,
