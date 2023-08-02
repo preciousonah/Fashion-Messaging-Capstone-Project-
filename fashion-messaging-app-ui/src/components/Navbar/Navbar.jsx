@@ -4,7 +4,7 @@ import Tooltip from "../Tooltip/Tooltip";
 
 export default function Navbar() {
   const links = [
-    { text: "Recommended Outfits!", url: "/", label: "Recommendations" },
+    { text: "Recommended Outfits!", url: "/recommendations", label: "Recommendations" },
     { text: "Shop Ideas", url: "/", label: "Shopping" },
     { text: "Open Messages", url: "/contact", label: "Messages" },
     { text: "Make a Post!", url: "/post", label: "Post" },
