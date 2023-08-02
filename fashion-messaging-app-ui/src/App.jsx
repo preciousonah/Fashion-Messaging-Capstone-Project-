@@ -7,12 +7,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginForm from './components/LoginForm/LoginForm';
 import SignupForm from './components/SignupForm/SignupForm';
 import Homepage from './components/Homepage/Homepage';
+import Recommendations from './components/Recommendations/Recommendations';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(() => {
     return null;
-});
+  });
 
   const updateUser = (newUser) => {
     setUser(newUser);
@@ -20,6 +21,7 @@ export default function App() {
   const [photos, setPhotos] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [noResults, setNoResults] = useState(false);
+  const [recommendations, setRecommendations] = useState([]); 
 
   useEffect(() => {
     setLoading(true);
@@ -40,10 +42,16 @@ export default function App() {
     localStorage.setItem('user', JSON.stringify(user));
   }, [searchQuery]);
 
+  useEffect(() => { 
+    fetch('http://localhost:3000/recommendations', { credentials: 'include' })
+      .then(response => response.json())
+      .then(data => setRecommendations(data))
+      .catch(error => console.error('Error fetching recommendations:', error));
+  }, [searchQuery]); 
+
   const handleSearch = query => {
     setSearchQuery(query);
   };
-
 
   if (loading) {
     return (
@@ -53,18 +61,19 @@ export default function App() {
     );
   } 
 
-  
   return (
     <div className="app">
       <UserContext.Provider value={{ user, updateUser }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={ <Homepage photos={photos} handleSearch={handleSearch} noResults={noResults}  /> } />
-          <Route path="/post" element={ <Main /> } />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/signup" element={<SignupForm />} />
-        </Routes>
-      </BrowserRouter>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={ <Homepage photos={photos} handleSearch={handleSearch} noResults={noResults}  /> } />
+            <Route path="/post" element={ <Main /> } />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/signup" element={<SignupForm />} />
+            <Route path="/recommendations" element={<Recommendations recommendations= {recommendations}/>} />
+
+          </Routes>
+        </BrowserRouter>
       </UserContext.Provider>
 
     </div>
