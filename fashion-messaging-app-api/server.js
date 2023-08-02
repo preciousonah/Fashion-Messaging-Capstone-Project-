@@ -12,6 +12,7 @@ import { sequelize } from './database.js';
 import { User, Post, SearchResult } from './models/index.js';
 import userRoutes from './routes/users.js';
 import SequelizeStoreInit from 'connect-session-sequelize';
+import { Op } from 'sequelize';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -117,7 +118,6 @@ app.get('/photos', async (req, res) => {
 
         try {
           const fetchResponse = await fetch('https://cloudapi.lykdat.com/v1/detection/items', requestOptions);
-         
           if (fetchResponse.status === 400) {
             throw new Error('Image size too large for the API.');
           }
@@ -144,7 +144,6 @@ app.get('/photos', async (req, res) => {
           userId: req.session.user ? req.session.user.id : null,
         },
       });
-    
       if (searchResult) {
         searchResult.searchCount += 1;
         await searchResult.save();
@@ -156,7 +155,7 @@ app.get('/photos', async (req, res) => {
           userId: req.session.user ? req.session.user.id : null,  
           searchCount: 1,
         });
-      }
+      }    
     }
 
     res.json(validPhotos);
@@ -173,45 +172,103 @@ app.get('/recommendations', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    let recommendations = [];  
+    const frequentSearch = await SearchResult.findOne({
+      where: { 
+        userId: req.session.user.id,
+        searchTerm: {
+          [Op.not]: defaultQuery  
+        }
+      },
+      order: [['searchCount', 'DESC']],
+    });
     const lastSearch = await SearchResult.findOne({
-      where: { userId: req.session.user.id },
+      where: { 
+        userId: req.session.user.id,
+        searchTerm: {
+          [Op.not]: defaultQuery 
+        }
+      },
       order: [['createdAt', 'DESC']],
     });
 
-    const mostFrequentSearch = await SearchResult.findOne({
-      where: { userId: req.session.user.id },
-      order: [['searchCount', 'DESC']],
+    const popularSearch = await SearchResult.findOne({
+      attributes: ['searchTerm', [sequelize.fn('COUNT', sequelize.col('searchTerm')), 'searchCount']],
+      group: ['searchTerm'],
+      where: {
+        searchTerm: {
+          [Op.not]: defaultQuery  
+        }
+      },
+      order: [[sequelize.fn('COUNT', sequelize.col('searchTerm')), 'DESC']],
+      raw: true,
     });
 
-    let lastSearchPhotos = [];
-    let mostFrequentSearchPhotos = [];
+    const latestPost = await Post.findOne({
+      where: { 
+        userId: req.session.user.id
+      },
+      order: [['createdAt', 'DESC']],
+    });
 
-    if (lastSearch) {
-      const response = await clientAPI.photos.search({ 
+
+    if (latestPost) {
+      const responseLatestPost = await clientAPI.photos.search({ 
+        query: latestPost.title,  
+        per_page: PHOTOS 
+      });
+
+      responseLatestPost.photos.forEach(photo => {
+        photo.source = "latest post";
+      });
+    
+      recommendations.push(...responseLatestPost.photos);
+    }
+
+   
+    if (!frequentSearch && !lastSearch && !popularSearch) {
+      return res.json([]);  
+    }
+
+    
+    if (frequentSearch) {
+      const responseFrequentSearch = await clientAPI.photos.search({ 
+        query: frequentSearch.searchTerm, 
+        per_page: PHOTOS 
+      });
+     
+      responseFrequentSearch.photos.forEach(photo => {
+        photo.source = "most frequent search";
+      });
+      recommendations.push(...responseFrequentSearch.photos);
+    }
+
+    
+    if (lastSearch && (!frequentSearch || (frequentSearch && frequentSearch.searchTerm !== lastSearch.searchTerm))) {
+      const responseLastSearch = await clientAPI.photos.search({ 
         query: lastSearch.searchTerm, 
         per_page: PHOTOS 
       });
-      lastSearchPhotos = response.photos;
-
+      
+      responseLastSearch.photos.forEach(photo => {
+        photo.source = "last search";
+      });
+      recommendations.push(...responseLastSearch.photos);
     }
-
-    if (mostFrequentSearch) {
-      const response = await clientAPI.photos.search({ 
-        query: mostFrequentSearch.searchTerm, 
+    if (popularSearch && (!frequentSearch || (frequentSearch && frequentSearch.searchTerm !== popularSearch.searchTerm)) && (!lastSearch || (lastSearch && lastSearch.searchTerm !== popularSearch.searchTerm))) {
+      const responsepopularSearch = await clientAPI.photos.search({ 
+        query: popularSearch.searchTerm, 
         per_page: PHOTOS 
       });
-      mostFrequentSearchPhotos = response.photos;
+
+  
+      responsepopularSearch.photos.forEach(photo => {
+        photo.source = "popular search";
+      });
+      recommendations.push(...responsepopularSearch.photos);
     }
 
-let photos = [...lastSearchPhotos, ...mostFrequentSearchPhotos];
-photos = [...new Map(photos.map(photo => [photo.id, photo])).values()];
-
-
- return res.json({
-      lastSearchPhotos,
-      mostFrequentSearchPhotos
-    });
-
+    return res.json(recommendations);
     
   } catch (error) {
     console.error("Error fetching recommendations:", error);
