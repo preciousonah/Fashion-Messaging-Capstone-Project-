@@ -21,7 +21,7 @@ const app = express();
 const API_KEY = "06ZcwjgbmJBM8T2TxLUZ5iwdXXGxiAgz0Z018b7QPKwR1ExipkFjaAuw";
 const clientAPI = createClient(API_KEY);
 const defaultQuery = "Fashion";
-const PHOTOS = 8;
+const PHOTOS = 2;
 
 let cache = new Map();
 app.use(cors({
@@ -74,6 +74,10 @@ app.use(
 );
 sessionStore.sync();
 
+app.use((req, res, next) => {
+  next();
+});
+
 app.use(userRoutes);
 app.get('/posts', async (req, res) => {
   try {
@@ -91,7 +95,7 @@ app.get('/photos', async (req, res) => {
 
   
   try {
-    const response = await clientAPI.photos.search({ query, per_page: PHOTOS });
+    const response = await clientAPI.photos.search({ query, per_page: PHOTOS, page: 1});
     
     let fetchPromises = response.photos.map(async photo => {
       if (cache.has(photo.src.original)) {
@@ -133,22 +137,85 @@ app.get('/photos', async (req, res) => {
 
     const fashionPhotos = await Promise.all(fetchPromises);
     const validPhotos = fashionPhotos.filter(photo => photo !== undefined && photo !== null);
-
     for (let photo of validPhotos) {
-      await SearchResult.create({
-        searchTerm: query,
-        imageUrl: photo.src.original,
-        isFashion: true,  
-        userId: req.session.user ? req.session.user.id : null,  
+      let searchResult = await SearchResult.findOne({
+        where: { 
+          searchTerm: query,
+          userId: req.session.user ? req.session.user.id : null,
+        },
       });
+    
+      if (searchResult) {
+        searchResult.searchCount += 1;
+        await searchResult.save();
+      } else {
+        await SearchResult.create({
+          searchTerm: query,
+          imageUrl: photo.src.original,
+          isFashion: true,  
+          userId: req.session.user ? req.session.user.id : null,  
+          searchCount: 1,
+        });
+      }
     }
-
 
     res.json(validPhotos);
   
   } catch (error) {
     console.error("Error fetching photos:", error);
     res.status(500).json({message: error.message});
+  }
+});
+
+app.get('/recommendations', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const lastSearch = await SearchResult.findOne({
+      where: { userId: req.session.user.id },
+      order: [['createdAt', 'DESC']],
+    });
+
+    const mostFrequentSearch = await SearchResult.findOne({
+      where: { userId: req.session.user.id },
+      order: [['searchCount', 'DESC']],
+    });
+
+    let lastSearchPhotos = [];
+    let mostFrequentSearchPhotos = [];
+
+    if (lastSearch) {
+      const response = await clientAPI.photos.search({ 
+        query: lastSearch.searchTerm, 
+        per_page: PHOTOS 
+      });
+      lastSearchPhotos = response.photos;
+
+    }
+
+    if (mostFrequentSearch) {
+      const response = await clientAPI.photos.search({ 
+        query: mostFrequentSearch.searchTerm, 
+        per_page: PHOTOS 
+      });
+      mostFrequentSearchPhotos = response.photos;
+    }
+
+let photos = [...lastSearchPhotos, ...mostFrequentSearchPhotos];
+photos = [...new Map(photos.map(photo => [photo.id, photo])).values()];
+
+
+ return res.json({
+      lastSearchPhotos,
+      mostFrequentSearchPhotos
+    });
+
+    
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    return res.status(500).json({ message: error.message });
   }
 });
 
