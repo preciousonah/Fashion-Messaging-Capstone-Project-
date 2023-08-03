@@ -99,7 +99,7 @@ app.get('/posts', async (req, res) => {
       try {
         const response = await clientAPI.photos.search({ query, per_page: perPage, page: 1});
         let fetchPromises = response.photos.map(async photo => {
-          if (cache.has(photo.src.original)) {
+          if (cache.has(photo.src.original)) { 
             return cache.get(photo.src.original);
             
           } else if (query !== defaultQuery) { 
@@ -125,7 +125,7 @@ app.get('/posts', async (req, res) => {
               const result = await fetchResponse.json();
     
               if (result.data.detected_items.length > 0) {
-                cache.set(photo.src.original, photo);
+                cache.set(photo.src.original, photo); 
                 return photo;
               }
     
@@ -149,7 +149,7 @@ app.get('/posts', async (req, res) => {
           searchTerm: query,
           userId: req.session.user ? req.session.user.id : null,
         },
-      });
+      });     
       if (searchResult) {
         searchResult.searchCount += 1;
         await searchResult.save();
@@ -178,7 +178,12 @@ app.get('/recommendations', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    let recommendations = [];    
+    let recommendations = {
+      lastSearch: [],
+      mostFrequent: [],
+      posts: [],
+      popularSearch: [],
+    };
     const frequentSearch = await SearchResult.findOne({
       where: { 
         userId: req.session.user.id,
@@ -225,8 +230,7 @@ app.get('/recommendations', async (req, res) => {
       responseLatestPost.photos.forEach(photo => {
         photo.source = "latest post";
       });
-    
-      recommendations.push(...responseLatestPost.photos);
+      recommendations.posts.push(...responseLatestPost.photos);
     }
 
     if (!frequentSearch && !lastSearch && !popularSearch) {
@@ -242,7 +246,7 @@ app.get('/recommendations', async (req, res) => {
       responseFrequentSearch.photos.forEach(photo => {
         photo.source = "most frequent search";
       });
-      recommendations.push(...responseFrequentSearch.photos);
+      recommendations.mostFrequent.push(...responseFrequentSearch.photos);
     }
 
     if (lastSearch && (!frequentSearch || (frequentSearch && frequentSearch.searchTerm !== lastSearch.searchTerm))) {
@@ -250,11 +254,10 @@ app.get('/recommendations', async (req, res) => {
         query: lastSearch.searchTerm, 
         per_page: PHOTOS 
       });
-      
       responseLastSearch.photos.forEach(photo => {
         photo.source = "last search";
       });
-      recommendations.push(...responseLastSearch.photos);
+      recommendations.lastSearch.push(...responseLastSearch.photos);
     }
     if (popularSearch && (!frequentSearch || (frequentSearch && frequentSearch.searchTerm !== popularSearch.searchTerm)) && (!lastSearch || (lastSearch && lastSearch.searchTerm !== popularSearch.searchTerm))) {
       const responsepopularSearch = await clientAPI.photos.search({ 
@@ -264,7 +267,7 @@ app.get('/recommendations', async (req, res) => {
       responsepopularSearch.photos.forEach(photo => {
         photo.source = "popular search";
       });
-      recommendations.push(...responsepopularSearch.photos);
+      recommendations.popularSearch.push(...responsepopularSearch.photos);
     }
 
     return res.json(recommendations);
