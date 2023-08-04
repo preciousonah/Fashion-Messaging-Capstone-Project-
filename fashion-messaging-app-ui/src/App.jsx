@@ -8,11 +8,14 @@ import LoginForm from './components/LoginForm/LoginForm';
 import SignupForm from './components/SignupForm/SignupForm';
 import Homepage from './components/Homepage/Homepage';
 import Recommendations from './components/Recommendations/Recommendations';
+import RequireLogin from './RequireLogin';
+
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(() => {
-    return null;
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
   });
 
   const updateUser = (newUser) => {
@@ -53,6 +56,11 @@ export default function App() {
     setSearchQuery(query);
   };
 
+
+  useEffect(() => {
+    localStorage.setItem('user', JSON.stringify(user));
+  }, [user]);
+  
   if (loading) {
     return (
       <div className="app">
@@ -66,16 +74,14 @@ export default function App() {
       <UserContext.Provider value={{ user, updateUser }}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={ <Homepage photos={photos} handleSearch={handleSearch} noResults={noResults}  /> } />
-            <Route path="/post" element={ <Main /> } />
+            <Route path="/" element={ <RequireLogin><Homepage photos={photos} handleSearch={handleSearch} noResults={noResults} /></RequireLogin> } />
+            <Route path="/post" element={ <RequireLogin><Main /></RequireLogin> } />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<SignupForm />} />
-            <Route path="/recommendations" element={<Recommendations recommendations= {recommendations}/>} />
-
+            <Route path="/recommendations" element={ <RequireLogin><Recommendations recommendations= {recommendations}/></RequireLogin> } />
           </Routes>
         </BrowserRouter>
       </UserContext.Provider>
-
     </div>
   );
 }
