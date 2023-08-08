@@ -3,7 +3,7 @@
 
 **User role:** User
 
--  A user who wants to search for fashion ideas and chat with friends online
+-  A user seeking to explore fashion inspirations,view and post their fashion ideas online and get fashion recommendations 
 
 **User personas:**
 - Name: Victoria
@@ -17,19 +17,17 @@
 
 
     - Potential pain points:
-        - Victoria prefers using platforms that are popular and widely used. She may hesitate to join a music inspired fashion website if it is not mainstream
+        - Victoria prefers using platforms that are popular and widely used. She may hesitate to join a fashion website if it is not mainstream
         -  Victoria values websites that are intuitive and easy to navigate. If a platform is complex or lacks clear organization, she may find it frustrating and may lose interest
         - Victoria can be indecisive about styles, so she appreciates platforms that offer diverse fashion inspirations
 
 
 **User stories:**
 - As a user, I want to have access to a comprehensive fashion search feature that allows me to filter and find specific clothing items 
-- As a user, I want to be able to easily share the fashion styles I'm currently viewing with my friends through messaging.
 - As a user , I want to make posts and view other people's posts on the website
 - As a user, I want a seamless and interactive user interface that makes it easy to navigate using elements such as arrows, sliders, well designed navigation, and a clear menu bar 
 - As a user, I want a captivating and aesthetically pleasing web page design like using a grid layout to display the fashion ideas, high quality images, vibrant color schemes and a responsive design
 - As a user, I want to be able to securely log in and out of my account
 - As a user, I want to be able to navigate to other websites through external links in the pictures
-- As a user, i want be able to like some ideas and have them saved under a liked folder
-- As a user, I want to be able to receive notifications whenever there is a new post or when i get a message from a friend
-- As a user, I want the homepage to display top ideas and a wide range of genres before i put in a search for a specific genre-inspired fashion idea
+- As a user, I want the homepage to display top ideas and a wide range of genres before i put in a search for a specific fashion idea
+- As a user, I want to be able get new recommendations for outfits based on my last post, most frequent search, last search and popular search from othr users 
