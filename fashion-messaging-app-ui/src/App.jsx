@@ -9,6 +9,7 @@ import SignupForm from './components/SignupForm/SignupForm';
 import Homepage from './components/Homepage/Homepage';
 import Recommendations from './components/Recommendations/Recommendations';
 import RequireLogin from './RequireLogin';
+import ClipLoader from "react-spinners/ClipLoader";
 
 
 export default function App() {
@@ -64,7 +65,11 @@ export default function App() {
   if (loading) {
     return (
       <div className="app">
-        <p>Loading...</p> 
+        <ClipLoader
+        color={"blue"}
+        loading={loading}
+        size={30}
+      />
       </div>
     );
   } 
