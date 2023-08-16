@@ -9,7 +9,7 @@ import path from 'path';
 import {fileURLToPath} from 'url';
 import { dirname } from 'path';
 import { sequelize } from './database.js';
-import { User, Post, SearchResult } from './models/index.js';
+import { User, Post, SearchResult, SavedImage} from './models/index.js';
 import userRoutes from './routes/users.js';
 import SequelizeStoreInit from 'connect-session-sequelize';
 import { Op } from 'sequelize';
@@ -17,7 +17,6 @@ import { Op } from 'sequelize';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const app = express();
-
 
 const API_KEY = "06ZcwjgbmJBM8T2TxLUZ5iwdXXGxiAgz0Z018b7QPKwR1ExipkFjaAuw";
 const clientAPI = createClient(API_KEY);
@@ -97,7 +96,7 @@ app.get('/posts', async (req, res) => {
       const perPage = (query === defaultQuery) ? 20 : PHOTOS; 
     
       try {
-        const response = await clientAPI.photos.search({ query, per_page: perPage, page: 1});
+        const response = await clientAPI.photos.search({ query, per_page: perPage, page: 1});  
         let fetchPromises = response.photos.map(async photo => {
           if (cache.has(photo.src.original)) { 
             return cache.get(photo.src.original);
@@ -105,7 +104,7 @@ app.get('/posts', async (req, res) => {
           } else if (query !== defaultQuery) { 
            
             var myHeaders = new Headers();
-            myHeaders.append("x-api-key", "7008b5da328806c39a5561c3d51339c18dbb66dcd8bbfeebca80f0a96c44c332");      
+            myHeaders.append("x-api-key", "7008b5da328806c39a5561c3d51339c18dbb66dcd8bbfeebca80f0a96c44c332");       
             
           
             var formdata = new FormData();
@@ -125,7 +124,7 @@ app.get('/posts', async (req, res) => {
               const result = await fetchResponse.json();
     
               if (result.data.detected_items.length > 0) {
-                cache.set(photo.src.original, photo); 
+                cache.set(photo.src.original, photo);  
                 return photo;
               }
     
@@ -160,6 +159,7 @@ app.get('/posts', async (req, res) => {
           isFashion: true,  
           userId: req.session.user ? req.session.user.id : null,  
           searchCount: 1,
+          imageId: photo.id,
         });
       }    
     }
@@ -176,7 +176,7 @@ app.get('/recommendations', async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ error: 'Unauthorized' });
-    }
+      } 
 
     let recommendations = {
       lastSearch: [],
@@ -246,19 +246,23 @@ app.get('/recommendations', async (req, res) => {
       responseFrequentSearch.photos.forEach(photo => {
         photo.source = "most frequent search";
       });
+
       recommendations.mostFrequent.push(...responseFrequentSearch.photos);
     }
 
+   
     if (lastSearch && (!frequentSearch || (frequentSearch && frequentSearch.searchTerm !== lastSearch.searchTerm))) {
       const responseLastSearch = await clientAPI.photos.search({ 
         query: lastSearch.searchTerm, 
         per_page: PHOTOS 
       });
+
       responseLastSearch.photos.forEach(photo => {
         photo.source = "last search";
       });
       recommendations.lastSearch.push(...responseLastSearch.photos);
     }
+
     if (popularSearch && (!frequentSearch || (frequentSearch && frequentSearch.searchTerm !== popularSearch.searchTerm)) && (!lastSearch || (lastSearch && lastSearch.searchTerm !== popularSearch.searchTerm))) {
       const responsepopularSearch = await clientAPI.photos.search({ 
         query: popularSearch.searchTerm, 
@@ -303,6 +307,95 @@ app.post('/posts', upload.single('picture'),
       res.status(500).json({ message: err.message });
     }
   });
+
+  app.post('/saved-images', async (req, res) => {
+    try {
+      if (!req.session.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+  
+      const userId = req.session.user.id;
+      const { imageUrl, imageId } = req.body;
+  
+      if (!imageUrl || !imageId) {
+        return res.status(400).json({ error: 'Image URL and Image ID are required.' });
+      }
+  
+      const existingImage = await SavedImage.findOne({
+        where: {
+          imageId: String(imageId)
+        }
+      });
+  
+      if (existingImage) {
+        const updatedImage = await existingImage.update({
+          imageUrl: imageUrl,
+          userId: userId
+        });
+        res.status(200).json(updatedImage);
+      } else {
+        const savedImage = await SavedImage.create({
+          userId,
+          imageUrl,
+          imageId
+        });
+        res.status(201).json(savedImage); 
+      }
+  
+    } catch (err) {
+      console.error("Error saving image:", err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+  
+  
+  app.get('/saved-images', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const userId = req.session.user.id;
+        const userSavedImages = await SavedImage.findAll({ where: { userId } });
+
+        res.json(userSavedImages);
+    } catch (err) {
+        console.error("Error fetching saved images:", err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
+app.delete('/saved-images/:imageId', async (req, res) => {
+  try {
+   
+      if (!req.session.user) {
+          return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const userId = req.session.user.id;
+      const  { imageId } = req.params;
+
+      const existingImage = await SavedImage.findOne({
+          where: {
+              userId,
+              imageId
+          }
+      });
+
+      if (!existingImage) {
+          return res.status(404).json({ error: 'Image not found' });
+      }
+
+      await existingImage.destroy();
+      
+
+      res.status(200).json({ message: 'Image unsaved successfully' });
+  } catch (err) {
+      console.error("Error removing saved image:", err); 
+      res.status(500).json({ message: err.message });
+  }
+});
+
 
 sequelize.sync({ alter: true })
   .then(() => {
