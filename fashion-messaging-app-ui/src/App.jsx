@@ -10,6 +10,7 @@ import Homepage from './components/Homepage/Homepage';
 import Recommendations from './components/Recommendations/Recommendations';
 import RequireLogin from './RequireLogin';
 import ClipLoader from "react-spinners/ClipLoader";
+import SavedImages from './components/SavedImages/SavedImages';
 
 
 export default function App() {
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="/login" element={<LoginForm />} />
             <Route path="/signup" element={<SignupForm />} />
             <Route path="/recommendations" element={ <RequireLogin><Recommendations recommendations= {recommendations}/></RequireLogin> } />
+            <Route path="/saved-images" element={ <RequireLogin><SavedImages /></RequireLogin> } />            
           </Routes>
         </BrowserRouter>
       </UserContext.Provider>
