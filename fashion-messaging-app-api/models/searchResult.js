@@ -22,4 +22,8 @@ export const SearchResult = sequelize.define('SearchResult', {
         type: DataTypes.BOOLEAN,
         allowNull: false,
       },
+      imageId: { 
+        type: DataTypes.STRING,
+        allowNull: true
+      }
 });
