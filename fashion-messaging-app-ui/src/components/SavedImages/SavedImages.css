@@ -1,18 +1,13 @@
-/* SavedImages.css */
 
-/* Assuming you want similar sizing for the images */
 .img-size {
     width: 20px;
   }
   
-  /* Adjusted grid container class */
   .saved-images-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     grid-gap: 5px;
   }
-  
-  /* Assuming you want a similar style for the individual image items, but we're removing classes that aren't apparent in the new component */
   .saved-images-item img {
     width: 100%;
     height: 100%;
@@ -21,9 +16,3 @@
     transition: transform .5s ease;
     border-radius: 18px;
   }
-  
-  /* Hover effect - scales the image */
-  /* .saved-images-item:hover img {
-    transform: scale(1.1);
-  } */
-  
