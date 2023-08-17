@@ -31,3 +31,6 @@
 - As a user, I want to be able to navigate to other websites through external links in the pictures
 - As a user, I want the homepage to display top ideas and a wide range of genres before i put in a search for a specific fashion idea
 - As a user, I want to be able get new recommendations for outfits based on my last post, most frequent search, last search and popular search from othr users 
+
+**Website Demo link:**
+https://www.loom.com/share/5de9ccc8207943f0bb1ea8fb1bc7df3b?sid=7603ca5f-99f7-4359-8e4a-8ce85862d7d2
