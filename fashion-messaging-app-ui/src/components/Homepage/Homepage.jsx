@@ -14,7 +14,7 @@ function Homepage({photos, handleSearch, noResults}) {
   };
 
   return (
-    <div>
+    <div>   
       <div className="container">
       <h1>Aesthetik.</h1>
         <Navbar />

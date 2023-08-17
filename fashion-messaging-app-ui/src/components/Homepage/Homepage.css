@@ -1,9 +1,14 @@
 h1{
     margin-top: 35px;
     padding: 0;
-    font-weight: normal;
+    font-weight: bold;
   }
-  
+
+  h1 {
+    font-family: 'Borel', cursive;
+
+}
+ 
    .container {
     display: flex;
     justify-content: space-between;

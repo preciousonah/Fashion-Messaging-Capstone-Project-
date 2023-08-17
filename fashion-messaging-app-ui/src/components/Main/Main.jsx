@@ -2,6 +2,7 @@ import "./Main.css"
 import { useState, useEffect, useContext } from "react";
 import { UserContext } from "../../UserContext.js";
 import { Link } from "react-router-dom";
+import Navbar from '../Navbar/Navbar';
 
 function Main() {
     const { user, updateUser } = useContext(UserContext);
@@ -68,6 +69,7 @@ function Main() {
     };
     return (
       <div className="main">
+             <Navbar /> 
       <header className="header">
         <div className="user-info">
           {user ? (
@@ -99,7 +101,7 @@ function Main() {
               name="picture"
               onChange={handleChange}
             />
-            <button type="submit">Submit</button>
+            <button type="submit">Click here to Post your favorite outfits!</button>
         </form>
         <div className="posts-container">
           {posts.map((post) => (
