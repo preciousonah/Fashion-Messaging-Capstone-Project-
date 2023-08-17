@@ -10,6 +10,7 @@ export default function Navbar() {
           <li><a href="/recommendations">Recommendations</a></li>
           <li><a href="/post">Post</a></li>
           <li><a href="/">Home</a></li>
+          <li><a href="/saved-images">Saved</a></li>
         </ul>
     </nav>
   );

@@ -1,0 +1,18 @@
+
+.img-size {
+    width: 20px;
+  }
+  
+  .saved-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-gap: 5px;
+  }
+  .saved-images-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s ease;
+    border-radius: 18px;
+  }
