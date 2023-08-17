@@ -1,6 +1,7 @@
 
 import React from 'react';
 import './Recommendations.css';
+import Navbar from '../Navbar/Navbar'; 
 
 export default function Recommendations({ recommendations }) {
     if (!recommendations) {
@@ -16,6 +17,7 @@ export default function Recommendations({ recommendations }) {
   
     return (
       <div className="recommendations">
+         <Navbar /> 
         {Object.keys(recommendations).map(key => (
           <div className="key" key={key}>
             <h2>{headers[key] || key}</h2>
